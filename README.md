@@ -11,3 +11,8 @@ Immerse yourself in the haunting world of "Tuga", a captivating souls-like game 
 
 - lossandgain ([Git](https://github.com/lossandgain), Tg) — The creator of the project and the main Unity developer
 - Add others
+
+## License
+
+Licensed under GNU General Public License ([v3.0](https://www.gnu.org/licenses/gpl-3.0.txt))
+
