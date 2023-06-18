@@ -9,7 +9,7 @@ Immerse yourself in the haunting world of "Tuga", a captivating souls-like game 
 
 ## Project Team
 
-- lossandgain  ([Git](https://github.com/lossandgain), Tg) — The creator of the project and the main Unity developer
+- lossandgain ([Git](https://github.com/lossandgain), Tg) — The creator of the project and the main Unity developer
 - Add others
 
 ## License
