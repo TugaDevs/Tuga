@@ -4,10 +4,9 @@ using UnityEngine;
 
 namespace ds
 {
-    public class AnimatorHandler : MonoBehaviour
+    public class AnimatorHandler : AnimatorManager
     {
         PlayerManager playerManager;
-        public Animator anim;
         InputHandler inputHandler;
         PlayerLocomotion playerLocomotion;
         int vertical;
@@ -88,13 +87,6 @@ namespace ds
             anim.SetFloat(horizontal, h, 0.1f, Time.deltaTime);
         }
 
-        public void PlayerTargetAnimation(string targetAnim, bool isInteracting)
-        {
-            anim.applyRootMotion = isInteracting;
-            anim.SetBool("isInteracting", isInteracting);
-            anim.CrossFade(targetAnim, 0.2f);
-        }
-
         public void CanRotate()
         {
             canRotate = true;
@@ -113,6 +105,16 @@ namespace ds
         public void DisableCombo()
         {
             anim.SetBool("canDoCombo", false);
+        }
+
+        public void EnableIsInvulnerable()
+        {
+            anim.SetBool("isInvulnerable", true);
+        }
+
+        public void DisableIsInvulnerable()
+        {
+            anim.SetBool("isInvulnerable", false);
         }
 
         private void OnAnimatorMove()

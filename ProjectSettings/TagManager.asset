@@ -16,12 +16,12 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
+  - Enviroment
+  - Character
   - Controller
-  - 
-  - 
-  - 
+  - Character Collider Blocker
+  - Player
+  - Enemy
   - 
   - 
   - 

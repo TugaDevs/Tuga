@@ -1,16 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
 namespace ds
 {
-    public class PlayerManager : MonoBehaviour
+    public class PlayerManager : CharacterManager
     {
 
         InputHandler inputHandler;
         Animator anim;
         CameraHandler cameraHandler;
+        PlayerStats playerStats;
         PlayerLocomotion playerLocomotion;
         InteractableUI interactableUI;
         public GameObject interactableUIGameObject;
@@ -23,6 +25,9 @@ namespace ds
         public bool isInAir;
         public bool isGrounded;
         public bool canDoCombo;
+        public bool isUsingRightHand;
+        public bool isUsingLeftHand;
+        public bool isInvulnerable;
 
         private void Awake()
         {
@@ -33,6 +38,7 @@ namespace ds
         {
             inputHandler = GetComponent<InputHandler>();
             anim = GetComponentInChildren<Animator>();
+            playerStats = GetComponent<PlayerStats>();
             playerLocomotion = GetComponent<PlayerLocomotion>();
             interactableUI = FindObjectOfType<InteractableUI>();
         }
@@ -43,13 +49,18 @@ namespace ds
 
             isInteracting = anim.GetBool("isInteracting");
             canDoCombo = anim.GetBool("canDoCombo");
+
+            isUsingRightHand = anim.GetBool("isUsingRightHand");
+            isUsingLeftHand = anim.GetBool("isUsingLeftHand");
+
+            isInvulnerable = anim.GetBool("isInvulnerable");
+
             anim.SetBool("isInAir", isInAir);
-          
+
             inputHandler.TickInput(delta);
-            playerLocomotion.HandleMovement(delta);
             playerLocomotion.HandleRollingAndSprinting(delta);
-            playerLocomotion.HandlerFalling(delta, playerLocomotion.moveDirection);
             playerLocomotion.HandleJumping();
+            playerStats.RegenerateStamina();
 
             ChekForInteractableObject();
         }
@@ -57,18 +68,13 @@ namespace ds
         private void FixedUpdate()
         {
             float delta = Time.fixedDeltaTime;
-
-            if (cameraHandler != null)
-            {
-                cameraHandler.FollowTarget(delta);
-                cameraHandler.HandleCameraRotation(delta, inputHandler.mouseX, inputHandler.mouseY);
-            }
+            playerLocomotion.HandleMovement(delta);
+            playerLocomotion.HandlerFalling(delta, playerLocomotion.moveDirection);
         }
 
         private void LateUpdate()
         {
             inputHandler.rollFlag = false;
-            inputHandler.sprintFlag = false;
             inputHandler.rb_Input = false;
             inputHandler.rt_Input = false;
             inputHandler.d_Pad_Up = false;
@@ -78,7 +84,14 @@ namespace ds
             inputHandler.a_Input = false;
             inputHandler.jump_Input = false;
             inputHandler.inventory_Input = false;
-          
+
+            float delta = Time.deltaTime;
+
+            if (cameraHandler != null)
+            {
+                cameraHandler.FollowTarget(delta);
+                cameraHandler.HandleCameraRotation(delta, inputHandler.mouseX, inputHandler.mouseY);
+            }
 
             if (isInAir)
             {

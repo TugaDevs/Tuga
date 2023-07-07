@@ -4,22 +4,19 @@ using UnityEngine;
 
 namespace ds
 {
-    public class PlayerStats : MonoBehaviour
+    public class PlayerStats : CharacterStats
     {
-        public int healthLevel = 10;
-        public int maxHealth;
-        public int currentHealht;
-
-        public int staminaLevel = 10;
-        public int maxStamina;
-        public int currentStamina;
-
+        PlayerManager playerManager;
         public HealthBar healthBar;
         public StaminaBar staminaBar;
         AnimatorHandler animatorHandler;
 
+        public float staminaRegenerationAmount = 25;
+        public float staminaRegenerationTimer = 0;
+
         private void Awake()
         {
+            playerManager = GetComponent<PlayerManager>();
             healthBar = FindObjectOfType<HealthBar>();
             staminaBar = FindObjectOfType<StaminaBar>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
@@ -43,7 +40,7 @@ namespace ds
             return maxHealth;
         }
 
-        private int SetMaxStaminaFromStaminaLevel()
+        private float SetMaxStaminaFromStaminaLevel()
         {
             maxStamina = staminaLevel * 10;
             return maxStamina;
@@ -51,6 +48,16 @@ namespace ds
 
         public void TakeDamage(int damage)
         {
+            if (playerManager.isInvulnerable)
+            {
+                return;
+            }
+
+            if (isDead)
+            {
+                return;
+            }
+
             currentHealht = currentHealht - damage;
 
             healthBar.SetCurrentHealt(currentHealht);
@@ -61,6 +68,7 @@ namespace ds
             {
                 currentHealht = 0;
                 animatorHandler.PlayerTargetAnimation("Death", true);
+                isDead = true;
             }
         }
 
@@ -68,6 +76,24 @@ namespace ds
         { 
             currentStamina = currentStamina - damage;
             staminaBar.SetCurrentStamina(currentStamina);
+        }
+
+        public void RegenerateStamina()
+        {
+            if (playerManager.isInteracting)
+            {
+                staminaRegenerationTimer = 0;
+            }
+            else
+            {
+                staminaRegenerationTimer += Time.deltaTime;
+
+                if (currentStamina < maxStamina && staminaRegenerationTimer > 1f)
+                {
+                    currentStamina += staminaRegenerationAmount * Time.deltaTime;
+                    staminaBar.SetCurrentStamina(Mathf.RoundToInt(currentStamina));
+                }
+            }
         }
 
     }

@@ -8,12 +8,19 @@ namespace ds
     {
 
         public PlayerInventory playerInventory;
-        EquipmentWindowUi equipmentWindowUi;
+        public EquipmentWindowUi equipmentWindowUi;
 
         [Header("UI Windows")]
         public GameObject hudWindow;
         public GameObject selectWindow;
+        public GameObject equipmentScreenWindow;
         public GameObject weaponInventoryWindow;
+
+        [Header("Equipment Window Slot Selected")]
+        public bool rightHandSlot01Selected;
+        public bool rightHandSlot02Selected;
+        public bool leftHandSlot01Selected;
+        public bool leftHandSlot02Selected;
 
         [Header("Weapon Inventory")]
         public GameObject weaponInventorySlotPrefab;
@@ -22,7 +29,7 @@ namespace ds
 
         private void Awake()
         {
-            equipmentWindowUi = FindObjectOfType<EquipmentWindowUi>();
+            
         }
         private void Start()
         {
@@ -66,7 +73,17 @@ namespace ds
 
         public void CloseAllInventoryWindows()
         {
+            ResetAllSelectedSlot();
             weaponInventoryWindow.SetActive(false);
+            equipmentScreenWindow.SetActive(false);
+        }
+
+        public void ResetAllSelectedSlot()
+        {
+            rightHandSlot01Selected = false;
+            rightHandSlot01Selected = false;
+            leftHandSlot01Selected = false;
+            leftHandSlot02Selected = false;
         }
     }
 }

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace ds
 {
@@ -14,9 +16,13 @@ namespace ds
 
         public bool b_Input;
         public bool a_Input;
+        public bool q_Input;
         public bool rb_Input;
         public bool rt_Input;
         public bool jump_Input;
+        public bool lockOn_Input;
+        public bool Lock_On_Left_Target_Input;
+        public bool Lock_On_Right_Target_Input;
 
         public bool d_Pad_Up;
         public bool d_Pad_Down;
@@ -26,8 +32,10 @@ namespace ds
         public bool inventory_Input;
 
         public bool rollFlag;
+        public bool twoHandFlag;
         public bool sprintFlag;
         public bool comboFlag;
+        public bool lockOnFlag;
         public bool inventoryFlag;
         public float rollInputTimer;
 
@@ -35,6 +43,9 @@ namespace ds
         PlayerAttacker playerAttacker;
         PlayerInventory playerInventory;
         PlayerManager playerManager;
+        WeaponSlotManager weaponSlotManager;
+        CameraHandler cameraHandler;
+        AnimatorHandler animatorHandler;
         UIManager uiManager;
 
         Vector2 movementInput;
@@ -45,7 +56,10 @@ namespace ds
             playerAttacker = GetComponent<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>(); 
             playerManager = GetComponent<PlayerManager>();
+            weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
             uiManager = FindObjectOfType<UIManager>();
+            cameraHandler = FindObjectOfType<CameraHandler>();
+            animatorHandler = GetComponentInChildren<AnimatorHandler>();
         }
 
 
@@ -56,8 +70,21 @@ namespace ds
                 inputActions = new PlayerControls();
                 inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
+
+                inputActions.PlayerMovement.LockOnTargetRight.performed += i => Lock_On_Right_Target_Input = true;
+                inputActions.PlayerMovement.LockOnTargetLeft.performed += i => Lock_On_Left_Target_Input = true;
+
+                inputActions.PlayerActions.RB.performed += i => rb_Input = true;
+                inputActions.PlayerActions.RT.performed += i => rt_Input = true;
+
                 inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
                 inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
+
+                inputActions.PlayerActions.Interaction.performed += i => a_Input = true;
+                inputActions.PlayerActions.Jump.performed += i => jump_Input = true;
+                inputActions.PlayerActions.Inventory.performed += i => inventory_Input = true;
+                inputActions.PlayerActions.LockOn.performed += i => lockOn_Input = true;
+                inputActions.PlayerActions.Q.performed += i => q_Input = true;
             }
             inputActions.Enable();
         }
@@ -69,16 +96,16 @@ namespace ds
 
         public void TickInput(float delta)
         {
-            MoveInput(delta);
+            HandleMoveInput(delta);
             HandleRollInput(delta);
             HandleAttackInput(delta);
-            HandleQuickSlotsInput();
-            HandleInteractingButton();
-            HandleJumpInput();
+            HandleQuickSlotsInput();;
             HandleInventoryInput();
+            HandleLockOnInput();
+            HandleTwoHandIpnut();
         }
 
-        private void MoveInput(float delta)
+        private void HandleMoveInput(float delta)
         {
             horizontal = movementInput.x;
             vertical = movementInput.y;
@@ -89,13 +116,12 @@ namespace ds
 
         private void HandleRollInput(float delta)
         {
-
             b_Input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
+            sprintFlag = b_Input;
 
             if (b_Input)
             {
                 rollInputTimer += delta;
-                sprintFlag = true;
             }
             else
             {
@@ -111,8 +137,6 @@ namespace ds
 
         private void HandleAttackInput(float delta)
         {
-            inputActions.PlayerActions.RB.performed += i => rb_Input = true;
-            inputActions.PlayerActions.RT.performed += i => rt_Input = true;
 
             if(rb_Input)
             {
@@ -132,6 +156,8 @@ namespace ds
                     {
                         return;
                     }
+
+                    animatorHandler.anim.SetBool("isUsingRightHand", true);
                     playerAttacker.HandleLightAttack(playerInventory.rightWeapon);
                 }
             }
@@ -154,21 +180,8 @@ namespace ds
             }
         }
 
-        private void HandleInteractingButton()
-        {
-
-            inputActions.PlayerActions.Interaction.performed += i => a_Input = true;
-
-        }
-
-        private void HandleJumpInput()
-        {
-            inputActions.PlayerActions.Jump.performed += i => jump_Input = true;
-        }
-
         private void HandleInventoryInput()
         {
-            inputActions.PlayerActions.Inventory.performed += i => inventory_Input = true;
 
             if (inventory_Input)
             {
@@ -185,6 +198,69 @@ namespace ds
                     uiManager.CloseSelectWindow();
                     uiManager.CloseAllInventoryWindows();
                     uiManager.hudWindow.SetActive(true);
+                }
+            }
+        }
+
+        private void HandleLockOnInput()
+        {
+            if (lockOn_Input && lockOnFlag == false)
+            {
+                lockOn_Input = false;
+                
+                cameraHandler.HandleLockOn();
+                if (cameraHandler.nearestLockOnTarget != null)
+                {
+                    cameraHandler.currentLockOnTarget = cameraHandler.nearestLockOnTarget;
+                    lockOnFlag = true;
+                }
+
+            }
+            else if (lockOn_Input && lockOnFlag)
+            {
+                lockOn_Input = false;
+                lockOnFlag = false;
+                cameraHandler.ClearLockOnTargets();
+            }
+
+            if (lockOnFlag && Lock_On_Left_Target_Input)
+            {
+                Lock_On_Left_Target_Input = false;
+                cameraHandler.HandleLockOn();
+                if (cameraHandler.leftLockTarget != null)
+                {
+                    cameraHandler.currentLockOnTarget = cameraHandler.leftLockTarget;
+                }
+            }
+
+            if (lockOnFlag && Lock_On_Right_Target_Input)
+            {
+                Lock_On_Right_Target_Input = false;
+                cameraHandler.HandleLockOn();
+                if (cameraHandler.rightLockTarget != null)
+                {
+                    cameraHandler.currentLockOnTarget = cameraHandler.rightLockTarget;
+                }
+            }
+
+            cameraHandler.SetCameraHeight();
+        }
+
+        private void HandleTwoHandIpnut()
+        {
+            if (q_Input)
+            {
+                q_Input = false;
+                twoHandFlag = !twoHandFlag;
+
+                if (twoHandFlag)
+                {
+                    weaponSlotManager.LoadWeaponOnSlot(playerInventory.rightWeapon, false);
+                }
+                else
+                {
+                    weaponSlotManager.LoadWeaponOnSlot(playerInventory.rightWeapon, false);
+                    weaponSlotManager.LoadWeaponOnSlot(playerInventory.leftWeapon, true);
                 }
             }
         }

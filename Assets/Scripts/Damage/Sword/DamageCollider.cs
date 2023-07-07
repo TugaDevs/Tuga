@@ -31,7 +31,7 @@ namespace ds
 
         private void OnTriggerEnter(Collider collision)
         {
-            if (collision.tag  == "Hittable")
+            if (collision.tag  == "Player")
             {
                 PlayerStats playerStats = collision.GetComponent<PlayerStats>();           
 
