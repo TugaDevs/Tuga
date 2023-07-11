@@ -9,6 +9,7 @@ namespace ds
 
         PlayerManager playerManager;
         AnimatorHandler animatorHandler;
+        PlayerStats playerStats;
         PlayerInventory playerInventory;
         InputHandler inputHandler;
         WeaponSlotManager weaponSlotManager;
@@ -19,6 +20,7 @@ namespace ds
         {
             playerManager = GetComponentInParent<PlayerManager>();
             animatorHandler = GetComponent<AnimatorHandler>();
+            playerStats = GetComponentInParent<PlayerStats>();
             playerInventory = GetComponentInParent<PlayerInventory>();
             weaponSlotManager = GetComponent<WeaponSlotManager>();
             inputHandler = GetComponentInParent<InputHandler>();
@@ -120,9 +122,14 @@ namespace ds
                 if (playerInventory.currentSpell != null && playerInventory.currentSpell.isFaithSpell)
                 {
                     //chek for fp
-                    //attemp to cast spell
+                    playerInventory.currentSpell.AttemptToCastSpell(animatorHandler, playerStats);
                 }
             }
+        }
+
+        private void SuccessfullyCastSpell()
+        {
+            playerInventory.currentSpell.SuccessfullyCastSpell(animatorHandler, playerStats);
         }
 
         #endregion

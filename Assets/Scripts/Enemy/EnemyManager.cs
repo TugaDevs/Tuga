@@ -10,12 +10,6 @@ namespace ds
         EnemyLocomotionManager enemyLocomotionManager;
         EnemyAnimatorManager enemyAnimatorManager;
         EnemyStats enemyStats;
-        
-
-        /*
-        public EnemyAttackAction[] enemyAttacks;
-        public EnemyAttackAction currentAttack;
-        */
 
         public State currentState;
         public CharacterStats currentTarget;
@@ -26,7 +20,6 @@ namespace ds
         public bool isInteracting;
         public float rotationSpeed = 15;
         public float maximumAttackRange = 1.5f;
-
 
         [Header("A.I Settings")]
         public float detectionRadius;

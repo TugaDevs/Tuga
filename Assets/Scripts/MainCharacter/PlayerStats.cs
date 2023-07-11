@@ -96,5 +96,17 @@ namespace ds
             }
         }
 
+        public void HealPlayer(int healAmount)
+        {
+            currentHealht = currentHealht + healAmount;
+
+            if (currentHealht > maxHealth)
+            {
+                currentHealht = maxHealth;
+            }
+
+            healthBar.SetCurrentHealt(currentHealht);
+        }
+
     }
 }
