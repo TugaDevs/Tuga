@@ -74,7 +74,18 @@ namespace ds
 
         private void HandleRecoveryTimer()
         {
+            if (currentRecoveryTime > 0)
+            {
+                currentRecoveryTime -= Time.deltaTime;
+            }
 
+            if (isPerformingAction)
+            {
+                if (currentRecoveryTime <=0)
+                {
+                    isPerformingAction = false;
+                }
+            }
         }
     }
 }

@@ -21,8 +21,7 @@ namespace ds
             if (enemyManager.isPerformingAction)
             {
                 return combatStanceState;
-            }
-            
+            }         
 
             if (currentAttack != null)
             {
